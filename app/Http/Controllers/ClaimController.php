@@ -36,7 +36,8 @@ class ClaimController extends Controller
             Notification::create([
                 'user_id' => $claim->user_id,
                 'title' => 'Claim Submitted',
-                'message' => 'Your claim for "' . ($claim->item_name ?? 'Unnamed Item') . '" has been submitted successfully.',
+                'message' => 'Your claim for "' . ($claim->item_name ?? 'Unnamed Item') . 
+                    '" has been submitted successfully.',
                 'type' => 'claim_submitted',
                 'is_read' => false,
                 'related_id' => $claim->claim_id,
@@ -56,7 +57,8 @@ class ClaimController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('Claim submission error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Server error: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Server error: '
+             . $e->getMessage()], 500);
         }
     }
 

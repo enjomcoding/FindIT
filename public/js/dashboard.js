@@ -284,3 +284,28 @@
             });
         });
     });
+
+
+    function applyFilters() {
+    const query = searchInput.value.trim().toLowerCase();
+    const [timeFilter, locationFilter, statusFilter] = Array.from(filters).map(f => f.value.toLowerCase());
+
+    let filtered = allItems.filter(item => {
+        const matchQuery =
+            item.name.includes(query) ||
+            item.category.includes(query) ||
+            item.location.includes(query);
+
+        const normalizedLocation = item.location.replace(/_/g, " ");
+        const matchLocation = locationFilter === "location" || normalizedLocation.includes(locationFilter);
+        const matchStatus = statusFilter === "status" || item.reportType === statusFilter;
+        const matchCategory = !activeCategory || item.category.includes(activeCategory);
+
+        return matchQuery && matchLocation && matchStatus && matchCategory;
+    });
+
+    if (timeFilter === "oldest") filtered = [...filtered].reverse();
+
+    updateCategoryCounts(filtered);
+    renderItems(filtered);
+}

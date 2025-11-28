@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: find_it-app
+    container_name: find_it-app
+    ports:
+      - "8000:8000"   # host 8000 → container 8000
+    volumes:
+      - .:/var/www/html:cached        # Use cached mount for faster file access
+      - storage:/var/www/html/storage  # Separate volume for storage
+      - vendor:/var/www/html/vendor    # Separate volume for vendor
+    depends_on:
+      - db
+    environment:
+      - APACHE_RUN_USER=www-data
+      - APACHE_RUN_GROUP=www-data
+      - APP_ENV=local
+      - APP_DEBUG=false               # Disable debug for faster performance
+    command: ["./wait-for-db.sh", "db", "php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+
+  db:
+    image: mysql:8.0
+    container_name: find_it-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: find_it
+      MYSQL_USER: findituser
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: find_it-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: findituser
+      PMA_PASSWORD: secret
+      PMA_PORT: 3306
+    depends_on:
+      - db
+
+volumes:
+  dbdata:
+  storage:
+  vendor:
